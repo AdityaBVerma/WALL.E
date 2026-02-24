@@ -1,0 +1,25 @@
+{
+  "name": "02-backend",
+  "version": "1.0.0",
+  "main": "index.js",
+  "type": "module",
+  "scripts": {
+    "dev": "nodemon src/server/server.js",
+    "start": "node src/server/server.js",
+    "job": "node src/jobs/pm25.job.js"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "description": "",
+  "dependencies": {
+    "cors": "^2.8.6",
+    "dotenv": "^17.3.1",
+    "express": "^5.2.1",
+    "node-fetch": "^3.3.2",
+    "redis": "^5.11.0"
+  },
+  "devDependencies": {
+    "nodemon": "^3.1.11"
+  }
+}
