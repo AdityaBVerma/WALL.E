@@ -101,8 +101,8 @@ export const aggregateData = async (redisClient) => {
 		// console.log(data)
 		//here is the problem i guess like the parsing
 		locationMap[data.id] = {
-			name: safeParse(data.name, {}),
-			timezone: safeParse(data.timezone, {}),
+			name: data?.name,
+			timezone: data?.timezone,
 			country: safeParse(data.country, {}),
 			owner: safeParse(data.owner, {}),
 			provider: safeParse(data.provider, {}),
