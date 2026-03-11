@@ -3,11 +3,12 @@ dotenv.config();
 
 import { connect } from "../config/redis.js";
 import app from "./app.js";
+import initDB from "../db/initDB.js";
 
 const startServer = async () => {
   try {
     const redisClient = await connect();
-
+    
     app.locals.redis = redisClient;
 		
     const PORT = process.env.PORT || 3000;

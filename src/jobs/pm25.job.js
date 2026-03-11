@@ -7,9 +7,14 @@ import { setLocationsRedis } from "../services/redis/location.cache.js";
 import { connect } from "../config/redis.js";
 import { aggregateData } from "../services/aggregation/pm25.aggregate.js";
 
+import initDB from "../db/initDB.js";
+import { insertAggregated } from "../services/timescaledb/insertAggregated.js";
 
 ( async () => {
 	const redisClient = await connect();// import
+	// timescale db init
+    await initDB();
+
 	try {
 			
 			const fetchedSensors = await fetchSensors();
@@ -29,10 +34,14 @@ import { aggregateData } from "../services/aggregation/pm25.aggregate.js";
 			// const test = await redisClient.hGetAll("openaq:sensor:8539597");
 			// console.log(test);
 
-			await aggregateData(redisClient);
+			const aggregatedData = await aggregateData(redisClient);
+
+			// put in timescale db
+			await insertAggregated(aggregatedData);
 		
+			console.log("Data inserted");
 	} catch (e) {
-    console.error("Error in IIFE:", e.message);
+    console.error("Error in IIFE:", e);
     process.exit(1);
   } finally {
     if (redisClient) {

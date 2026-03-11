@@ -222,6 +222,7 @@ export const aggregateData = async (redisClient) => {
 	
 	console.log(`PM2.5 snapshot written (${aggregated.length} records)`);
 	
+	return aggregated;
 	// await redisClient.quit();	
 		
 }
