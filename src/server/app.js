@@ -2,6 +2,8 @@ import express from "express";
 import cors from "cors";
 import path from "path";
 import { fileURLToPath } from "url";
+import { pool } from "../db/db.js";
+import { error } from "console";
 
 const app = express();
 
@@ -24,6 +26,21 @@ app.get("/pm25", (req, res) => {
   );
 });
 
+app.get("/pm25/monthly", async(req, res) => {
+  try{
+    
+    const results = await pool.query(`
+      SELECT * FROM monthly_pm25
+      ORDER BY city, month
+    `);
+    console.log(results.rows);
+    console.log(results);
+    res.send("hello");
+    //for now let's just see first
+  } catch (error) {
+    console.error("problem in getting monthly data : ", error.message);
+  }
+})
 
 app.use((err, req, res, next) => {
   console.error(err);

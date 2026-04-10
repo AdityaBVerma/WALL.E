@@ -10,6 +10,7 @@ import { aggregateData } from "../services/aggregation/pm25.aggregate.js";
 import initDB from "../db/initDB.js";
 import { insertAggregated } from "../services/timescaledb/insertAggregated.js";
 import { insertLocation } from "../services/timescaledb/insertLocation.js";
+import { pool } from "../db/db.js";
 
 ( async () => {
 	const redisClient = await connect();// import
@@ -33,7 +34,8 @@ import { insertLocation } from "../services/timescaledb/insertLocation.js";
 			// console.log(await redisClient.keys("*"));
 			
 			// put in locations table
-			await insertLocation(fetchLocations);
+			await insertLocation(fetchedLocations);
+			console.log("Location data inserted")
 
 			// const test = await redisClient.hGetAll("openaq:sensor:8539597");
 			// console.log(test);
@@ -43,7 +45,13 @@ import { insertLocation } from "../services/timescaledb/insertLocation.js";
 			// put in timescale db
 			await insertAggregated(aggregatedData);
 		
-			console.log("Data inserted");
+			console.log("Sensor data inserted");
+			
+			// // just refresh the materialized view
+			// await pool.query(`
+			// 	SET max_parallel_workers_per_gather = 0;
+			// 	REFRESH MATERIALIZED VIEW monthly_pm25;
+			// `);
 	} catch (e) {
     console.error("Error in IIFE:", e);
     process.exit(1);

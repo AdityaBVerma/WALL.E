@@ -5,7 +5,7 @@
   "type": "module",
   "scripts": {
     "start": "pm2 start src/server/server.js --name server",
-    "job": "pm2 start src/jobs/pm25.job.js --name pm25-job --cron \"30 6 * * *\"" 
+    "job": "pm2 start src/jobs/pm25.job.js --name pm25-job --cron \"0 * * * *\"" 
   },
   "keywords": [],
   "author": "",

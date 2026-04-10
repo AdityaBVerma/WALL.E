@@ -9,6 +9,9 @@ const initDB = async () => {
 	*/
 		await client.query("BEGIN");
 		
+		/**
+		 * here taking primary key as (sensor_id, parameter, time) so that i wont have to later insert unchanged values as there are many dormant sensors 
+		 */
 		await client.query(`
 			CREATE TABLE IF NOT EXISTS sensor_data(
 					time TIMESTAMPTZ NOT NULL,
@@ -80,6 +83,51 @@ const initDB = async () => {
 			);
 		`);
 		
+		/**
+		 * 1. We are using here materialized view so that the data is not retrieved everytime form the db for each request
+		 * 
+		 * we were initialy using a normalized materialized view 
+		 * how it was fetching int the cron job everyday
+		 * 
+		 * SET max_parallel_workers_per_gather = 0;
+		 * REFRESH MATERIALIZED VIEW monthly_pm25;
+		 * 
+		 * PROBLEM with this was that it accquired many locks like if 3 workers then 90+ as today is april just to fetch the data from Jan - Apr
+		 * but i was planing to expand this to like many years and many months so the locks would come to be 2k+ for a year as and 10k+ for 5 years
+		 * 
+		 * NOTE the number of locks are huge as each chunk required a lock to and then when running parallel workers before it was acquiring many locks 
+		 * hence it was throwing out of shared memory error then i max_parallel_workers_per_gather = 0 
+		 * i could also have increased the number of locks that the postgre can acquire but till when 1024 i guess was max
+		 * 
+		 * so i am using continuous aggregation it will recompute 6 months data everytime so like not that many locks are required now
+		 * it will now recompute last 6 months data every day
+		 */
+		await client.query(`
+			DROP MATERIALIZED VIEW IF EXISTS monthly_pm25;
+		`);
+
+		await client.query(`
+			CREATE MATERIALIZED VIEW monthly_pm25
+			WITH (timescaledb.continuous) AS
+			SELECT 
+				l.name AS city,
+				time_bucket('1 month', s.time) AS month,
+				AVG(s.value) AS avg_pm25
+			FROM sensor_data s
+			JOIN locations l ON s.location_id = l.id
+			WHERE s.parameter = 'pm2.5'
+			GROUP BY city, month;
+		`);
+		
+		await client.query(`
+			SELECT add_continuous_aggregate_policy(
+				'monthly_pm25',
+				start_offset => INTERVAL '6 months',
+				end_offset => INTERVAL '1 hour',
+				schedule_interval => INTERVAL '1 day'
+			);
+		`);
+
 		await client.query("COMMIT");
 		
 		console.log("Timescale DB Ready");

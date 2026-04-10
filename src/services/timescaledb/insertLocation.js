@@ -58,7 +58,7 @@ export const insertLocation  = async (locations) => {
                     console.log(`Inserted batch ${(j / batchSize) + 1}`);
                 } catch (err) {
                     await client.query("ROLLBACK");
-                    throw error;
+                    throw err;
                 }
             }
     } catch (error) {
