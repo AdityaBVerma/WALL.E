@@ -4,9 +4,8 @@
   "main": "index.js",
   "type": "module",
   "scripts": {
-    "dev": "nodemon src/server/server.js",
-    "start": "node src/server/server.js",
-    "job": "node src/jobs/pm25.job.js"
+    "start": "pm2 start src/server/server.js --name server",
+    "job": "pm2 start src/jobs/pm25.job.js --name pm25-job --cron \"30 6 * * *\"" 
   },
   "keywords": [],
   "author": "",

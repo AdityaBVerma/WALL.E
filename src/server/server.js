@@ -7,6 +7,7 @@ import initDB from "../db/initDB.js";
 
 const startServer = async () => {
   try {
+    await initDB(); 
     const redisClient = await connect();
     
     app.locals.redis = redisClient;

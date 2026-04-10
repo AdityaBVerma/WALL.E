@@ -9,6 +9,7 @@ import { aggregateData } from "../services/aggregation/pm25.aggregate.js";
 
 import initDB from "../db/initDB.js";
 import { insertAggregated } from "../services/timescaledb/insertAggregated.js";
+import { insertLocation } from "../services/timescaledb/insertLocation.js";
 
 ( async () => {
 	const redisClient = await connect();// import
@@ -31,6 +32,9 @@ import { insertAggregated } from "../services/timescaledb/insertAggregated.js";
 			console.log(`${fetchedLocations.length} locations saved to redis successfully `)
 			// console.log(await redisClient.keys("*"));
 			
+			// put in locations table
+			await insertLocation(fetchLocations);
+
 			// const test = await redisClient.hGetAll("openaq:sensor:8539597");
 			// console.log(test);
 
