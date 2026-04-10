@@ -26,6 +26,26 @@ app.get("/pm25", (req, res) => {
   );
 });
 
+
+/**
+ * "/pm25/monthly"
+ * [
+    {
+      "city": "2912 Coffey",
+      "month_label": "March 2026",
+      "year": 2026,
+      "month": 3,
+      "avg_pm25": 1.5
+    },
+    {
+      "city": "2912 Coffey",
+      "month_label": "April 2026",
+      "year": 2026,
+      "month": 4,
+      "avg_pm25": 6
+    }
+  ]
+*/
 app.get("/pm25/monthly", async(req, res) => {
   try{
     
@@ -33,12 +53,21 @@ app.get("/pm25/monthly", async(req, res) => {
       SELECT * FROM monthly_pm25
       ORDER BY city, month
     `);
-    console.log(results.rows);
-    console.log(results);
-    res.send("hello");
-    //for now let's just see first
+
+    const formatted = results.rows.map(row => ({
+      city: row.city,
+      month_label: new Date(row.month).toLocaleString("en-IN", {
+        month: "long",
+        year: "numeric"
+      }),
+      year: new Date(row.month).getUTCFullYear(),
+      month: new Date(row.month).getUTCMonth() + 1,
+      avg_pm25: row.avg_pm25
+    }));
+    res.json(formatted);
   } catch (error) {
     console.error("problem in getting monthly data : ", error.message);
+    res.status(500).json({ error: "Internal Server Error" });
   }
 })
 
